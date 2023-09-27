@@ -19,3 +19,5 @@ Zapchats
 	hasSeen: Boolean
 
 full crud on all of these aspects
+
+technologies: js, express, cors, socket potentially
