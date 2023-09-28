@@ -53,4 +53,10 @@ router.get('/seed', async (req, res)=>{
     res.json(createdUsers)
 })
 
+router.get('/:id', async (req, res)=>{
+    const user = await User.findById(req.params.id)
+    await user.populate('folders')
+    res.json(user)
+})
+
 module.exports = router
