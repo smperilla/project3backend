@@ -6,6 +6,7 @@ const morgan = require('morgan')
 const PORT = process.env.PORT
 const folderController = require('./controllers/folderController.js')
 const chatController = require('./controllers/chatController.js')
+const authController = require('./controllers/authController.js')
 //MIDDLEWARE
 app.use(cors())
 app.use(morgan('tiny'))
@@ -17,6 +18,7 @@ app.get('/', (req, res)=>{
     res.send('testing!')
 })
 
+app.use('/users', authController)
 app.use('/folders', folderController)
 app.use('/chats', chatController)
 
