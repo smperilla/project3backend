@@ -4,8 +4,12 @@ const Chat = require('../models/chat')
 const express = require('express')
 const router = express.Router()
 
-router.get('/', (req, res)=>{
-    res.send('hello from User route')
+router.get('/', async (req, res)=>{
+    const users = await User.find({})
+    for (const user of users) {
+        await user.populate('folders')
+    }
+    res.json(users)
 })
 
 router.get('/seed', async (req, res)=>{
