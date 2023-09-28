@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 //SEED
+
 //INDEX
 router.get('/', (req, res)=>{
     res.send('testing from the folder route')
