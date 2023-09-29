@@ -13,6 +13,18 @@ router.get('/', async (req, res)=>{
 
 //DELETE
 //UPDATE
+router.put('/:id', async (req, res)=>{
+    if(req.body.title){
+        try {
+            res.json(
+                await Folder.findByIdAndUpdate(req.params.id, {title: req.body.title}, {new:true})
+            )
+        } catch (error) {
+            res.status(400).json(error);
+        }
+    }
+})
+
 //CREATE
 router.post("/", async (req, res) => {
     try {
@@ -26,6 +38,13 @@ router.post("/", async (req, res) => {
     }
 });
 //SHOW
+router.get('/:id', async (req,res)=>{
+    try {
+        res.json(await Folder.findById(req.params.id));
+    } catch (error) {
+        res.status(400).json(error);
+    }
 
+})
 
 module.exports = router
