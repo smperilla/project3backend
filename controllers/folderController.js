@@ -12,6 +12,14 @@ router.get('/', async (req, res)=>{
 })
 
 //DELETE
+router.delete('/:id', async (req, res)=>{
+    try {
+        res.json(await Folder.findByIdAndDelete(req.params.id))
+    } catch (error) {
+        res.status(400).json(error);
+    }
+})
+
 //UPDATE
 router.put('/:id', async (req, res)=>{
     if(req.body.title){
