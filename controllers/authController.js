@@ -56,6 +56,13 @@ router.get('/seed', async (req, res)=>{
 router.get('/:id', async (req, res)=>{
     const user = await User.findById(req.params.id)
     await user.populate('folders')
+    for (const folder of user.folders){
+        await folder.populate('chats')
+        for (const author of folder.chats){
+            await author.populate('users')
+            await author.populate('zapAuthors')
+        }
+    }   
     res.json(user)
 })
 
