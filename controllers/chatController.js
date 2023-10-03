@@ -79,7 +79,11 @@ router.put('/:id', async (req, res)=>{
 router.post("/", async (req, res) => {
     try {
         const newChat = {}
-        newChat.subject = req.body.subject
+        if (req.body.subject){
+            newChat.subject = req.body.subject
+        } else {
+            newChat.subject = 'No Subject'
+        }
         const recipient = await User.findOne({username:req.body.recipients})
         newChat.users = [recipient._id.toHexString()]
         newChat.users.push('6515dc9ffc1ca272ca121d28')
