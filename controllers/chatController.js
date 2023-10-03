@@ -74,7 +74,37 @@ router.put('/:id', async (req, res)=>{
         res.status(400).json(error);
     }
 })
+
 //CREATE
+router.post("/", async (req, res) => {
+    try {
+        const newChat = {}
+        newChat.subject = req.body.subject
+        const recipient = await User.findOne({username:req.body.recipients})
+        newChat.users = [recipient._id.toHexString()]
+        newChat.users.push('6515dc9ffc1ca272ca121d28')
+        //REQ.SESSION.USERID^
+        newChat.zaps = [req.body.zap]
+        newChat.zapAuthors = ['6515dc9ffc1ca272ca121d28']
+        //REQ.SESSION.USERID^
+        const createdChat= await Chat.create(newChat)
+        const createdChatId = createdChat._id.toHexString()
+        console.log(createdChat);
+        console.log(createdChatId);
+        await createdChat.populate('users')
+        for (const user of createdChat.users){
+            console.log(user);
+            await user.populate('folders')
+            const inbox = user.folders.find(f=>f.title=='inbox')
+            console.log(inbox);
+            const inboxId = inbox._id.toHexString()
+            await Folder.findByIdAndUpdate(inboxId, {$push: {chats: createdChatId}}, {new:true})
+        }
+        res.json(createdChat)
+    } catch (error) {
+      res.status(400).json(error);
+    }
+});
 //SHOW
 
 
