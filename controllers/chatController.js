@@ -41,7 +41,7 @@ router.get('/seed', async (req, res)=>{
         subject: 'Concert tomorrow',
         users: [userCId, userBId, userDId, userFId],
         zaps: ['so excited for tomorrow!', 'woooo', 'ayyy', 'wait, who invited c...', 'shoot my bad guys'],
-        zapAuthors: [userCId, userBId, userDId, userFId, userFId, userBId]
+        zapAuthors: [userCId, userBId, userDId, userFId, userBId, userCId]
     }]
     const createdConvos = await Chat.create(starterConvos)
     const convo1Id = createdConvos[0]._id.toHexString()
@@ -49,7 +49,11 @@ router.get('/seed', async (req, res)=>{
     const convo3Id = createdConvos[2]._id.toHexString()
     const convo4Id = createdConvos[3]._id.toHexString()
     const inboxC = userC.folders.find(f=>f.title=='inbox')
-    console.log(inboxC);
+    const plansC = userC.folders.find(f=>f.title=='plans')
+    const inboxCId = inboxC._id.toHexString()
+    const plansCId = plansC._id.toHexString()
+    await Folder.findByIdAndUpdate(inboxCId, {$push: {chats: [convo1Id, convo2Id, convo3Id]}}, {new: true})
+    await Folder.findByIdAndUpdate(plansCId, {$push: {chats: convo4Id}}, {new: true})
     res.json(createdConvos)
 })
 
@@ -60,6 +64,16 @@ router.get('/', async(req, res)=>{
 
 //DELETE
 //UPDATE
+router.put('/:id', async (req, res)=>{
+    try {
+        await Chat.findByIdAndUpdate(req.params.id, {$push: {zaps: req.body.zap}}, {new:true})
+        //BELOW HERE REQ.SESSIONS.USERID
+        await Chat.findByIdAndUpdate(req.params.id, {$push: {zapAuthors: '6515dc9ffc1ca272ca121d28'}}, {new:true})
+        res.json(req.body)
+    } catch (error) {
+        res.status(400).json(error);
+    }
+})
 //CREATE
 //SHOW
 

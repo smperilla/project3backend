@@ -7,7 +7,7 @@ const router = express.Router()
 
 //INDEX
 router.get('/', async (req, res)=>{
-    const folders = await Folder.find({})
+    const folders = await Folder.find({}).populate('chats')
     res.json(folders)
 })
 
