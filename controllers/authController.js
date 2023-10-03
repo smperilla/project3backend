@@ -20,6 +20,7 @@ router.get('/seed', async (req, res)=>{
         {title: 'inbox'},
         {title: 'sent'},
         {title: 'deleted'},
+        {title: 'drafts'},
         {title: 'My First Folder'}
     ]
     const aFolders = await Folder.create(starterFolders)
@@ -55,6 +56,7 @@ router.get('/seed', async (req, res)=>{
 
 router.get('/:id', async (req, res)=>{
     const user = await User.findById(req.params.id)
+    // await user.populate('drafts')
     await user.populate('folders')
     for (const folder of user.folders){
         await folder.populate('chats')
