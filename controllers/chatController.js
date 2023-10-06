@@ -33,9 +33,9 @@ router.get('/seed', async (req, res)=>{
     },
     {
         subject: 'Want to go on a Date with me?',
-        users: [userCId, userAId],
-        zaps: ['hey, I was wondering if you are free tongiht?', 'heyyyy', '....', 'idk...', 'tough'],
-        zapAuthors: [userCId, userAId, userAId, userAId, userCId]
+        users: [userCId, userAId, userBId],
+        zaps: ['hey, I was wondering if you are free tongiht?', 'heyyyy', '....', 'idk...', 'tough', 'this is tough to watch...why am i on this'],
+        zapAuthors: [userCId, userAId, userAId, userAId, userCId, userBId]
     },
     {
         subject: 'Concert tomorrow',
@@ -48,10 +48,16 @@ router.get('/seed', async (req, res)=>{
     const convo2Id = createdConvos[1]._id.toHexString()
     const convo3Id = createdConvos[2]._id.toHexString()
     const convo4Id = createdConvos[3]._id.toHexString()
+    const inboxB = userB.folders.find(f=>f.title=='inbox')
+    const plansB = userB.folders.find(f=>f.title=='plans')
     const inboxC = userC.folders.find(f=>f.title=='inbox')
     const plansC = userC.folders.find(f=>f.title=='plans')
+    const inboxBId = inboxB._id.toHexString()
+    const plansBId = plansB._id.toHexString()
     const inboxCId = inboxC._id.toHexString()
     const plansCId = plansC._id.toHexString()
+    await Folder.findByIdAndUpdate(inboxBId, {$push: {chats: [convo1Id, convo2Id, convo3Id]}}, {new: true})
+    await Folder.findByIdAndUpdate(plansBId, {$push: {chats: convo4Id}}, {new: true})
     await Folder.findByIdAndUpdate(inboxCId, {$push: {chats: [convo1Id, convo2Id, convo3Id]}}, {new: true})
     await Folder.findByIdAndUpdate(plansCId, {$push: {chats: convo4Id}}, {new: true})
     res.json(createdConvos)

@@ -67,16 +67,16 @@ io.on('connection', (socket)=>{
         }   
         socket.emit('object', obj)
     })
-    socket.on('sendMessage', async(zap)=>{
+    socket.on('sendMessage', async(zap, userid)=>{
         console.log(zap.zap);
         console.log(zap.chatId);
         console.log(zap.folderId);
         await Chat.findByIdAndUpdate(zap.chatId, {$push: {zaps: zap.zap}}, {new:true})
         //BELOW HERE REQ.SESSIONS.USERID
-        const updatedChat = await Chat.findByIdAndUpdate(zap.chatId, {$push: {zapAuthors: '6515dc9ffc1ca272ca121d28'}}, {new:true})
+        const updatedChat = await Chat.findByIdAndUpdate(zap.chatId, {$push: {zapAuthors: userid}}, {new:true})
         await updatedChat.populate('users')
         await updatedChat.populate('zapAuthors')
-        const user = await User.findById('6515dc9ffc1ca272ca121d28')
+        const user = await User.findById(userid)
         await user.populate('folders')
         for (const folder of user.folders){
             await folder.populate('chats')

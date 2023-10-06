@@ -11,10 +11,12 @@ router.post("/", async (req, res) => {
   console.log(req.body);
 
   let userToLogin = await User.findOne({ username: req.body.username });
+  console.log(userToLogin);
   if (userToLogin) {
     bcrypt.compare(req.body.password, userToLogin.password, (err, result) => {
       if (result) {
-        req.session.userid = userToLogin._id.toHexString();
+        const id = userToLogin._id.toHexString();
+        req.session.userid = id
         // req.session.username = userToLogin.name;
         res.json({
           message: "success",
@@ -23,7 +25,7 @@ router.post("/", async (req, res) => {
           // username: userToLogin.username,
         });
       } else {
-        res.send("Incorrect Password");
+        res.json("Incorrect Password");
       }
     });
   }
