@@ -14,12 +14,13 @@ router.post("/", async (req, res) => {
   if (userToLogin) {
     bcrypt.compare(req.body.password, userToLogin.password, (err, result) => {
       if (result) {
-        req.session.userId = userToLogin._id;
-        req.session.username = userToLogin.name;
+        req.session.userid = userToLogin._id.toHexString();
+        // req.session.username = userToLogin.name;
         res.json({
           message: "success",
-          userId: userToLogin._id,
-          username: userToLogin.username,
+          // userid: userToLogin._id.toHexString(),
+          userid: req.session.userid
+          // username: userToLogin.username,
         });
       } else {
         res.send("Incorrect Password");

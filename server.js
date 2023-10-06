@@ -4,6 +4,8 @@ const app = express();
 const server = require('http').createServer(app);
 const { Server } = require("socket.io");
 const User = require('./models/user')
+const Chat = require('./models/chat')
+const Folder = require('./models/folder')
 const cors = require("cors");
 const morgan = require("morgan");
 const PORT = process.env.PORT;
@@ -12,9 +14,13 @@ const folderController = require("./controllers/folderController.js");
 const chatController = require("./controllers/chatController.js");
 const authController = require("./controllers/authController.js");
 const loginController = require("./controllers/loginController.js");
-
+const allowedOrigin = 'http://localhost:3000';
+const corsOptions = {
+    origin: allowedOrigin,
+    credentials: true, // Allow credentials (cookies)
+  };
 //MIDDLEWARE
-app.use(cors());
+app.use(cors(corsOptions));
 const io = new Server(server,{
     cors: {
       origin: '*',
@@ -24,10 +30,13 @@ const io = new Server(server,{
 app.use(morgan("tiny"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(session({ secret: "somestring", cookie: { maxAge: 3600000 } }));
+app.use(session({ 
+    secret: "somestring", 
+    cookie: { domain: '.http://localhost:4000' } 
+}));
 
 app.get("/", (req, res) => {
-  res.send("testing!");
+  res.send("testing!"+req.session.userid);
 });
 
 app.use("/users", authController);
@@ -57,6 +66,32 @@ io.on('connection', (socket)=>{
             }
         }   
         socket.emit('object', obj)
+    })
+    socket.on('sendMessage', async(zap)=>{
+        console.log(zap.zap);
+        console.log(zap.chatId);
+        console.log(zap.folderId);
+        await Chat.findByIdAndUpdate(zap.chatId, {$push: {zaps: zap.zap}}, {new:true})
+        //BELOW HERE REQ.SESSIONS.USERID
+        const updatedChat = await Chat.findByIdAndUpdate(zap.chatId, {$push: {zapAuthors: '6515dc9ffc1ca272ca121d28'}}, {new:true})
+        await updatedChat.populate('users')
+        await updatedChat.populate('zapAuthors')
+        const user = await User.findById('6515dc9ffc1ca272ca121d28')
+        await user.populate('folders')
+        for (const folder of user.folders){
+            await folder.populate('chats')
+            for (const author of folder.chats){
+                await author.populate('users')
+                await author.populate('zapAuthors')
+            }
+        } 
+        const folder = await Folder.findById(zap.folderId)
+        await folder.populate('chats')
+        for (const chat of folder.chats){
+            await chat.populate('users')
+            await chat.populate('zapAuthors')
+        }
+        socket.emit('sentMessage', updatedChat, user, folder)
     })
 })
 
