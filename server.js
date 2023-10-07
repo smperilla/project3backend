@@ -15,13 +15,8 @@ const folderController = require("./controllers/folderController.js");
 const chatController = require("./controllers/chatController.js");
 const authController = require("./controllers/authController.js");
 const loginController = require("./controllers/loginController.js");
-// const allowedOrigin = 'http://localhost:3000';
-// const corsOptions = {
-//     origin: allowedOrigin,
-//     credentials: true, // Allow credentials (cookies)
-//   };
+
 //MIDDLEWARE
-// app.use(cors(corsOptions));
 app.use(cors());
 const io = new Server(server,{
     cors: {
@@ -32,10 +27,7 @@ const io = new Server(server,{
 app.use(morgan("tiny"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(session({ 
-    secret: secret, 
-    // cookie: { domain: '.http://localhost:4000' } 
-}));
+app.use(session({ secret: secret }));
 
 app.get("/", (req, res) => {
   res.send("testing!"+req.session.userid);
