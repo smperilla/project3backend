@@ -40,6 +40,7 @@ app.use("/login", loginController);
 
 io.on('connection', (socket)=>{
     console.log('a user connected')
+    socket.join('globalRoom');
     socket.on('disconnect', ()=>{
         console.log('user disconnected');
     })
@@ -68,8 +69,29 @@ io.on('connection', (socket)=>{
         await Chat.findByIdAndUpdate(zap.chatId, {$push: {zaps: zap.zap}}, {new:true})
         //BELOW HERE REQ.SESSIONS.USERID
         const updatedChat = await Chat.findByIdAndUpdate(zap.chatId, {$push: {zapAuthors: userid}}, {new:true})
-        await updatedChat.populate('users')
-        await updatedChat.populate('zapAuthors')
+        // await updatedChat.populate('users')
+        // await updatedChat.populate('zapAuthors')
+        // const user = await User.findById(userid)
+        // await user.populate('folders')
+        // for (const folder of user.folders){
+        //     await folder.populate('chats')
+        //     for (const author of folder.chats){
+        //         await author.populate('users')
+        //         await author.populate('zapAuthors')
+        //     }
+        // } 
+        // const folder = await Folder.findById(zap.folderId)
+        // await folder.populate('chats')
+        // for (const chat of folder.chats){
+        //     await chat.populate('users')
+        //     await chat.populate('zapAuthors')
+        // }
+        // socket.emit('sentMessage', updatedChat, user, folder)
+        // socket.emit('update', 'word')
+        // socket.broadcast.emit('update', 'word')
+        io.to('globalRoom').emit('update', 'word')
+    })
+    socket.on('updateMe', async (userid, folderid, chatid)=>{
         const user = await User.findById(userid)
         await user.populate('folders')
         for (const folder of user.folders){
@@ -79,14 +101,18 @@ io.on('connection', (socket)=>{
                 await author.populate('zapAuthors')
             }
         } 
-        const folder = await Folder.findById(zap.folderId)
+        const folder = await Folder.findById(folderid)
         await folder.populate('chats')
         for (const chat of folder.chats){
             await chat.populate('users')
             await chat.populate('zapAuthors')
         }
-        socket.emit('sentMessage', updatedChat, user, folder)
+        const chat = await Chat.findById(chatid)
+        await chat.populate('users')
+        await chat.populate('zapAuthors')
+        socket.emit('updatedYou', user, folder, chat)
     })
+
     socket.on('renameFolder', async(folder, folderId, userid)=>{
         console.log(folder);
         console.log(folderId);
