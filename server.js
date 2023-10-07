@@ -203,6 +203,31 @@ io.on('connection', (socket)=>{
         }
         socket.emit('movedFolder', user, newDestination)
     })
+    socket.on('deleteFolder', async (folderid, userid)=>{
+        console.log(folderid);
+        console.log(userid);
+        const folderToDelete = await Folder.findById(folderid)
+        const user = await User.findById(userid)
+        await user.populate('folders')
+        const inbox = user.folders.find(f=>f.title=='inbox')
+        const updatedInbox = await Folder.findByIdAndUpdate(inbox._id, {$push: {chats: folderToDelete.chats}}, {new:true})
+        await Folder.findByIdAndDelete(folderid)
+        const updatedUser = await User.findById(userid)
+        await updatedUser.populate('folders')
+        for (const folder of updatedUser.folders){
+            await folder.populate('chats')
+            for (const author of folder.chats){
+                await author.populate('users')
+                await author.populate('zapAuthors')
+            }
+        } 
+        await updatedInbox.populate('chats')
+        for (const chat of updatedInbox.chats){
+            await chat.populate('users')
+            await chat.populate('zapAuthors')
+        }
+        socket.emit('deletedFolder', updatedInbox, updatedUser)
+    })
 })
 
 
