@@ -1,7 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user.js");
+const Folder = require('../models/folder.js')
 const bcrypt = require("bcrypt");
+const saltRounds = parseInt(process.env.SALT_ROUNDS)
 
 router.get("/", (req, res) => {
   res.send("login");
@@ -38,9 +41,20 @@ router.get("/signup", (req, res) => {
 router.post("/signup", async (req, res) => {
   if (req.body.username && req.body.password) {
     let plainTextPassword = req.body.password;
-    bcrypt.hash(plainTextPassword, 10, async (err, hashedPassword) => {
+    bcrypt.hash(plainTextPassword, saltRounds, async (err, hashedPassword) => {
       req.body.password = hashedPassword;
       let newUser = await User.create(req.body);
+      const starterFolders = [
+        {title: 'inbox'},
+        {title: 'sent'},
+        {title: 'deleted'},
+        {title: 'drafts'},
+        {title: 'plans'}
+      ]
+      const createdStarterFolders = await Folder.create(starterFolders)
+      const starterFoldersIds = []
+      await createdStarterFolders.forEach(f=>{starterFoldersIds.push(f._id)})
+      await User.findByIdAndUpdate(newUser._id, {folders:starterFoldersIds}, {new:true})
       res.send(newUser);
     });
   }
@@ -54,15 +68,11 @@ router.get("/logout", (req, res) => {
 router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      // handle error
       return res.status(500).send("Failed to logout.");
     }
-    // Clear the session cookie from the client-side
-    res.clearCookie("connect.sid"); // 'connect.sid' is the default cookie name used by express-session
+    res.clearCookie("connect.sid"); 
     return res.send("Logged out!");
   });
 });
-
-//Need headers with credentials set to true.
 
 module.exports = router;
